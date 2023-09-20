@@ -128,6 +128,10 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
             for state in self.event_registration_columns
             if user[state] == I18n.yes
         ]
+        if len(my_events) == 0:
+            await update.message.reply_markdown(Settings.all_my_events_list_empty_text)
+            return
+
         await update.message.reply_markdown(
             keyboard_row.text_markdown.format(template="\n\n".join(my_events)),
             reply_markup=Keyboard.get_event_unregister_inline_button()
@@ -201,6 +205,12 @@ async def remove_event_registration_key_handler(self: UsersAdapterClass, update:
         return
 
     user = self.get(update.effective_chat.id)
+
+    if keyboard_row.state not in user.index.to_list():
+        await self.keyboard_key_handler(update, context)
+        await self._update_record(update.effective_chat.id, 'state', '')
+        return
+
     is_not_registered = (user[keyboard_row.state] != I18n.yes)
     if is_not_registered:
         reply_markup = Keyboard.get_inline_keyboard_by_state(keyboard_row.state)
