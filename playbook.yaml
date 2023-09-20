@@ -9,7 +9,7 @@
     - name: Run bot docker service
       docker_swarm_service:
         name: createch-bot
-        image: twobrowin/createch-bot:1.1.0
+        image: twobrowin/createch-bot:1.1.1
         env:
           TZ: "Europe/Moscow"
           

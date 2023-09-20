@@ -13,5 +13,7 @@ COPY requirenments.txt .
 RUN pip3 install -r requirenments.txt
 
 COPY python/*.py ./
+RUN  mkdir ./ext
+COPY python/ext/*.py ./ext
 
 CMD [ "python3", "-u", "main.py"]
