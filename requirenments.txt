@@ -1,2 +1,2 @@
-spreadsheetbot==2.2.0
+spreadsheetbot==2.3.4
 python-dotenv

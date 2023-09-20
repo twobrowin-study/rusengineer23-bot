@@ -1,10 +1,18 @@
 import os, sys, json, dotenv
 from spreadsheetbot import SpreadSheetBot, Log, DEBUG
 
-from telegram.ext import Application
+from telegram.ext import (
+    Application, Defaults,
+    CallbackQueryHandler,
+    MessageHandler
+)
 
-from ext.users import UsersAdapterClass
+from ext.users import UsersAdapterClass, HasRemoveEventRegistrationStateFilter
 from ext.keyboard import KeyboardAdapterClass
+from ext.notifications import NotificationsAdapterClass
+
+from spreadsheetbot.sheets.users import Users
+from spreadsheetbot.sheets.keyboard import Keyboard
 
 from ext.qr import Qr
 from ext.accreditation import ScheldueAccredidation
@@ -40,4 +48,11 @@ if __name__ == "__main__":
         SWITCH_UPDATE_TIME,
         SETTINGS_UPDATE_TIME
     )
-    bot.run_polling()
+    bot.run_polling(
+        defaults=Defaults(disable_web_page_preview=True),
+        extra_user_handlers=[
+            CallbackQueryHandler(Users.my_events_unregister_start_callback_handler, pattern=Keyboard.CALLBACK_ALL_EVENTS_UNREGISTER_START, block=False),
+            MessageHandler(HasRemoveEventRegistrationStateFilter,                   Users.remove_event_registration_key_handler,           block=False),
+            CallbackQueryHandler(Users.event_unregister_callback_handler,           pattern=Keyboard.CALLBACK_EVENT_UNREGISTER_PATTERN,    block=False),
+        ]
+    )
