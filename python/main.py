@@ -4,7 +4,10 @@ from spreadsheetbot import SpreadSheetBot, Log, DEBUG
 from telegram.ext import Application
 
 from ext.users import UsersAdapterClass
+from ext.keyboard import KeyboardAdapterClass
+
 from ext.qr import Qr
+from ext.accreditation import ScheldueAccredidation
 
 if "DOCKER_RUN" in os.environ:
     Log.info("Running in docker environment")
@@ -26,6 +29,7 @@ SpreadSheetBot.post_init_default = SpreadSheetBot.post_init
 async def post_init(self: SpreadSheetBot, app: Application) -> None:
     await self.post_init_default(app)
     await Qr.async_init(self.sheets_secret, self.sheets_link)
+    ScheldueAccredidation(app)
 SpreadSheetBot.post_init = post_init
 
 if __name__ == "__main__":

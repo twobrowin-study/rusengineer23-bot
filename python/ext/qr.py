@@ -14,5 +14,8 @@ class QrAdapterClass(AbstractSheetAdapter):
         df = pd.DataFrame(await self.wks.get_all_records())
         df = df.drop(index = 0, axis = 0)
         return df
+    
+    def get(self, accreditation_code: str) -> pd.Series:
+        return self._get(self.as_df.accreditation_code == accreditation_code)
 
 Qr = QrAdapterClass()

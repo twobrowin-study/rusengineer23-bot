@@ -1,6 +1,9 @@
+import base64
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
+
+import pandas as pd
 
 from spreadsheetbot.sheets.users import UsersAdapterClass
 from spreadsheetbot.sheets.settings import Settings
@@ -11,7 +14,13 @@ from spreadsheetbot.sheets.groups import Groups
 from spreadsheetbot.sheets.report import Report
 from spreadsheetbot.sheets.keyboard import Keyboard
 
-async def proceed_registration_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+from ext.qr import Qr
+
+def get_by_accreditation_code(self: UsersAdapterClass, accreditation_code: str) -> pd.Series:
+    return self._get(self.as_df.accreditation_code == accreditation_code)
+UsersAdapterClass.get_by_accreditation_code = get_by_accreditation_code
+
+async def proceed_registration_handler(self: UsersAdapterClass, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user    = self.get(update.effective_chat.id)
     state   = user.state
     save_as = user[Settings.user_document_name_field]
@@ -27,11 +36,11 @@ async def proceed_registration_handler(self, update: Update, context: ContextTyp
         return
 
     if last_state:
-        accredetation_code = Settings.accreditation_code_template.format(user=user)
-        registration_complete = Settings.registration_complete.format(accredetation_code=accredetation_code)
+        accreditation_code = Settings.accreditation_code_template.format(accreditiation_num=user.name)
+        registration_complete = Settings.registration_complete.format(accreditation_code=accreditation_code)
         await update.message.reply_markdown(registration_complete, reply_markup=Keyboard.reply_keyboard)
         await self._batch_update_or_create_record(update.effective_chat.id, **{
-            'accredetation_code': accredetation_code,
+            'accreditation_code': accreditation_code,
             'is_accredited':      I18n.no
         })
     else:
@@ -54,3 +63,35 @@ async def proceed_registration_handler(self, update: Update, context: ContextTyp
             ParseMode.MARKDOWN
         )
 UsersAdapterClass.proceed_registration_handler = proceed_registration_handler
+
+async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    keyboard_row = Keyboard.get(update.message.text)
+    if keyboard_row.function == Keyboard.REGISTER_FUNCTION:
+        user = self._get(self.selector(update.effective_chat.id))
+        await update.message.reply_markdown(
+            keyboard_row.text_markdown.format(user=self.user_data_markdown(user)),
+            reply_markup=self.user_data_inline_keyboard(user)
+        )
+        return
+    
+    if keyboard_row.function == Keyboard.QR_CODE_FUNCTION:
+        user = self.get(update.message.chat_id)
+        accreditation_code = user.accreditation_code
+        if user.is_accredited not in [I18n.qr_sent, I18n.yes]:
+            await update.message.reply_markdown(
+                Settings.qr_accreditation_failure.format(accredetation_code=accreditation_code)
+            )
+            return
+        
+        qr = Qr.get(accreditation_code)
+        qr_photo = base64.standard_b64decode(qr.base64)
+        await update.message.reply_photo(qr_photo, caption=Settings.qr_code_caption, parse_mode=ParseMode.MARKDOWN)
+
+    if keyboard_row.function == Keyboard.EVENT_LIST_FUNCTION:
+        await update.message.reply_markdown(
+            keyboard_row.text_markdown,
+            # reply_markup=reply_keyboard,
+            disable_web_page_preview=True
+        )
+        return
+UsersAdapterClass.keyboard_key_handler = keyboard_key_handler
