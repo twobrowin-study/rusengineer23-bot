@@ -4,3 +4,4 @@
 **/.env
 **/hosts.ini
 **/secrets.yaml
+**/inventory.yaml
