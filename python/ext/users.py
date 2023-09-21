@@ -151,6 +151,14 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
             reply_markup=Keyboard.get_event_unregister_inline_button()
         )
         return
+    
+    if keyboard_row.key == Keyboard.PROGRAM_DOWNLOAD_KEY:
+        await update.message.reply_document(
+            keyboard_row.send_document,
+            caption=keyboard_row.text_markdown,
+            parse_mode=ParseMode.MARKDOWN
+        )
+        return
 
     user = self.get(update.effective_chat.id)
     is_registered = (user[keyboard_row.state] == I18n.yes)

@@ -21,6 +21,7 @@ async def _pre_async_init(self: KeyboardAdapterClass):
     self.EVENT_LIST_FUNCTION    = I18n.event_list
     self.BACK_FUNCTION          = I18n.back
     self.ALL_MY_EVENTS_FUNCTION = I18n.all_my_events
+    self.PROGRAM_DOWNLOAD_KEY = I18n.program_download
 KeyboardAdapterClass._pre_async_init = _pre_async_init
 
 async def _get_df(self) -> pd.DataFrame:
