@@ -1,6 +1,6 @@
 import base64
 from telegram import Update, Message
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, Application
 from telegram.constants import ParseMode
 
 import pandas as pd
@@ -37,6 +37,20 @@ UsersAdapterClass._process_df_update = _process_df_update
 def get_by_accreditation_code(self: UsersAdapterClass, accreditation_code: str) -> pd.Series:
     return self._get(self.as_df.accreditation_code == accreditation_code)
 UsersAdapterClass.get_by_accreditation_code = get_by_accreditation_code
+
+def send_notification_to_all_users(self: UsersAdapterClass, app: Application, message: str, parse_mode: str,
+                                    send_photo: str = None, state: str = None,
+                                    condition: str = None):
+    selector = self.selector_condition('is_active')
+    if condition not in ['', None]:
+        selector = self.selector_condition('is_active') & self.selector_condition(condition)
+    self._send_to_all_uids(
+        selector,
+        app, message, parse_mode,
+        send_photo,
+        reply_markup=Notifications.get_inline_keyboard_by_state(state)
+    )
+UsersAdapterClass.send_notification_to_all_users = send_notification_to_all_users
 
 async def proceed_registration_handler(self: UsersAdapterClass, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user    = self.get(update.effective_chat.id)
@@ -135,6 +149,16 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
         await update.message.reply_markdown(
             keyboard_row.text_markdown.format(template="\n\n".join(my_events)),
             reply_markup=Keyboard.get_event_unregister_inline_button()
+        )
+        return
+
+    user = self.get(update.effective_chat.id)
+    is_registered = (user[keyboard_row.state] == I18n.yes)
+    if is_registered:
+        reply_markup = Keyboard.get_unregister_inline_keyboard_by_state(keyboard_row.state)
+        await update.message.reply_markdown(
+            keyboard_row.text_markdown,
+            reply_markup=reply_markup
         )
         return
 
