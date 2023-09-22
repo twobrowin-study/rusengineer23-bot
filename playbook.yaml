@@ -5,11 +5,21 @@
     - name: Init a new swarm with default parameters
       community.docker.docker_swarm:
         state: present
+      
+    - name: Ensure hashdb.sqlite exists
+      copy:
+        content: ""
+        dest: ~/hashdb.sqlite
+        force: false
 
     - name: Run bot docker service
       docker_swarm_service:
         name: createch-bot
-        image: twobrowin/createch-bot:1.1.2
+        image: twobrowin/createch-bot:1.2.0
+        mounts:
+          - source: /home/user/hashdb.sqlite
+            target: /hashdb.sqlite
+            type: bind
         env:
           TZ: "Europe/Moscow"
           
@@ -19,3 +29,5 @@
 
           SWITCH_UPDATE_TIME:   '15'
           SETTINGS_UPDATE_TIME: '35'
+          
+          HASH_DB: /hashdb.sqlite
