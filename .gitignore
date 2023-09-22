@@ -5,3 +5,4 @@
 **/hosts.ini
 **/secrets.yaml
 **/inventory.yaml
+**/hashdb.sqlite

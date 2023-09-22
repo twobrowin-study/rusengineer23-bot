@@ -11,6 +11,8 @@ from ext.users import UsersAdapterClass, HasRemoveEventRegistrationStateFilter
 from ext.keyboard import KeyboardAdapterClass
 from ext.notifications import NotificationsAdapterClass
 
+from ext.database import HashDb
+
 from spreadsheetbot.sheets.users import Users
 from spreadsheetbot.sheets.keyboard import Keyboard
 
@@ -32,6 +34,7 @@ SHEETS_ACC_JSON      = json.loads(os.environ.get('SHEETS_ACC_JSON'))
 SHEETS_LINK          = os.environ.get('SHEETS_LINK')
 SWITCH_UPDATE_TIME   = int(os.environ.get('SWITCH_UPDATE_TIME'))
 SETTINGS_UPDATE_TIME = int(os.environ.get('SETTINGS_UPDATE_TIME'))
+HASH_DB              = os.environ.get('HASH_DB')
 
 SpreadSheetBot.post_init_default = SpreadSheetBot.post_init
 async def post_init(self: SpreadSheetBot, app: Application) -> None:
@@ -48,6 +51,8 @@ if __name__ == "__main__":
         SWITCH_UPDATE_TIME,
         SETTINGS_UPDATE_TIME
     )
+    Users.db = HashDb(HASH_DB)
+    Users.db.initialize_table()
     bot.run_polling(
         defaults=Defaults(disable_web_page_preview=True),
         extra_user_handlers=[

@@ -1,4 +1,4 @@
-import base64
+import base64, re
 from telegram import Update, Message
 from telegram.ext import ContextTypes, Application
 from telegram.constants import ParseMode
@@ -26,6 +26,22 @@ class HasRemoveEventRegistrationStateClass(AbstractSheetAdapter.AbstractFilter):
             (df.state == Settings.event_unregister_state)
         ].empty
 HasRemoveEventRegistrationStateFilter = Users.IsRegisteredFilter & HasRemoveEventRegistrationStateClass(outer_obj=Users)
+
+def get_state_string_fun(self: UsersAdapterClass, user, state):
+    if user[state] == '':
+        return I18n.data_empty
+    if Registration.is_document_state(state):
+        return state
+    if Registration.get(state).is_main_question:
+        return self.db.get_val(user[state])
+    return user[state]
+UsersAdapterClass.get_state_string_fun = get_state_string_fun
+
+UsersAdapterClass.default_pre_async_init = UsersAdapterClass._pre_async_init
+async def _pre_async_init(self: UsersAdapterClass):
+    await self.default_pre_async_init()
+    self.get_state_string = self.get_state_string_fun
+UsersAdapterClass._pre_async_init = _pre_async_init
 
 async def _process_df_update(self: UsersAdapterClass):
     self.event_registration_columns = [
@@ -78,7 +94,12 @@ async def proceed_registration_handler(self: UsersAdapterClass, update: Update, 
     else:
         await update.message.reply_markdown(registration_next.question, reply_markup=registration_next.reply_keyboard)
 
-    update_vals = {state: state_val}
+    if registration_curr.is_main_question:
+        state_val = self.db.add_val(state_val)
+
+    update_vals = {
+        state: state_val
+    }
     if last_main_state:
         update_vals['is_active'] = I18n.yes
     
@@ -95,6 +116,34 @@ async def proceed_registration_handler(self: UsersAdapterClass, update: Update, 
             ParseMode.MARKDOWN
         )
 UsersAdapterClass.proceed_registration_handler = proceed_registration_handler
+    
+async def change_state_reply_handler(self: UsersAdapterClass, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = self.get(update.effective_chat.id)
+    _,state,message_id = re.split(self.USER_CHANGE_STATE_SEPARATORS, user.state)
+    save_as = user[Settings.user_document_name_field]
+    registration = Registration.get(state)
+
+    state_val, save_to = self._prepare_state_to_save(update.message, registration.document_link)
+    if state_val == None:
+        await update.message.reply_markdown(registration.question, reply_markup=registration.reply_keyboard)
+        return
+
+    await update.message.reply_markdown(
+        Settings.user_change_message_reply_template.format(state=state),
+        reply_markup=Keyboard.reply_keyboard
+    )
+
+    if registration.is_main_question:
+        state_val = self.db.add_val(state_val)
+
+    await self._batch_update_or_create_record(update.effective_chat.id, save_to=save_to, save_as=save_as, app=context.application,
+        state = '',
+        **{
+            state: state_val
+        }
+    )
+    await self._change_message_after_callback(update.effective_chat.id, message_id, context.application)
+UsersAdapterClass.change_state_reply_handler = change_state_reply_handler
 
 async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard_row = Keyboard.get(update.message.text)
