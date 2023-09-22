@@ -202,11 +202,14 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
         return
     
     if keyboard_row.key.endswith(Keyboard.PROGRAM_DOWNLOAD_KEY):
-        await update.message.reply_document(
-            keyboard_row.send_document,
-            caption=keyboard_row.text_markdown,
-            parse_mode=ParseMode.MARKDOWN
-        )
+        if keyboard_row.send_document not in [None, '']:
+            await update.message.reply_document(
+                keyboard_row.send_document,
+                caption=keyboard_row.text_markdown,
+                parse_mode=ParseMode.MARKDOWN
+            )
+            return
+        await update.message.reply_markdown(keyboard_row.text_markdown)
         return
 
     user = self.get(update.effective_chat.id)
