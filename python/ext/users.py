@@ -201,7 +201,7 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
         )
         return
     
-    if keyboard_row.key == Keyboard.PROGRAM_DOWNLOAD_KEY:
+    if keyboard_row.key.endswith(Keyboard.PROGRAM_DOWNLOAD_KEY):
         await update.message.reply_document(
             keyboard_row.send_document,
             caption=keyboard_row.text_markdown,
