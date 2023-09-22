@@ -15,7 +15,7 @@
     - name: Run bot docker service
       docker_swarm_service:
         name: createch-bot
-        image: twobrowin/createch-bot:1.2.0
+        image: twobrowin/createch-bot:1.2.1
         mounts:
           - source: /home/user/hashdb.sqlite
             target: /hashdb.sqlite
