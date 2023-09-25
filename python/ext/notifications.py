@@ -2,7 +2,7 @@ from spreadsheetbot.sheets.notifications import NotificationsAdapterClass
 
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-from spreadsheetbot.sheets.i18n import I18n
+from spreadsheetbot.sheets.keyboard import Keyboard
 
 def get_inline_keyboard_by_state(self: NotificationsAdapterClass, state: str) -> InlineKeyboardMarkup|None:
     key = self.get_by_state(state)
@@ -21,7 +21,7 @@ def get_inline_keyboard_by_state(self: NotificationsAdapterClass, state: str) ->
             )]
             for idx in range(len(button_text))
         ])
-    return None
+    return Keyboard.reply_keyboard
 NotificationsAdapterClass.get_inline_keyboard_by_state = get_inline_keyboard_by_state
 
 def get_button_answer_by_state(self: NotificationsAdapterClass, state_index: str, answer_idx: int = None) -> tuple[str,str,str]:
