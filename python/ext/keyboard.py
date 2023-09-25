@@ -17,11 +17,12 @@ KeyboardAdapterClass.CALLBACK_EVENT_UNREGISTER_PATTERN  = 'event_unregister_.*'
 KeyboardAdapterClass.default_pre_async_init = KeyboardAdapterClass._pre_async_init
 async def _pre_async_init(self: KeyboardAdapterClass):
     await self.default_pre_async_init()
-    self.QR_CODE_FUNCTION       = I18n.qr_code
-    self.EVENT_LIST_FUNCTION    = I18n.event_list
-    self.BACK_FUNCTION          = I18n.back
-    self.ALL_MY_EVENTS_FUNCTION = I18n.all_my_events
-    self.PROGRAM_DOWNLOAD_KEY = I18n.program_download
+    self.QR_CODE_FUNCTION          = I18n.qr_code
+    self.EVENT_LIST_FUNCTION       = I18n.event_list
+    self.BACK_FUNCTION             = I18n.back
+    self.ALL_MY_EVENTS_FUNCTION    = I18n.all_my_events
+    self.PROGRAM_DOWNLOAD_KEY      = I18n.program_download
+    self.PROGRAM_DOWNLOAD_FUNCTION = I18n.program_download
 KeyboardAdapterClass._pre_async_init = _pre_async_init
 
 async def _get_df(self) -> pd.DataFrame:
@@ -54,7 +55,8 @@ async def _process_df_update(self: KeyboardAdapterClass):
             self.REGISTER_FUNCTION,
             self.QR_CODE_FUNCTION,
             self.EVENT_LIST_FUNCTION,
-            self.ALL_MY_EVENTS_FUNCTION
+            self.ALL_MY_EVENTS_FUNCTION,
+            self.PROGRAM_DOWNLOAD_FUNCTION
         ])
     ].key.values.tolist()
     self.reply_keyboard = self._create_keyboard_markup_from_keys(base_keys)
