@@ -1,5 +1,5 @@
 import base64, re
-from telegram import Update, Message
+from telegram import Update, Message, ReplyKeyboardRemove
 from telegram.ext import ContextTypes, Application
 from telegram.constants import ParseMode
 
@@ -258,6 +258,19 @@ async def notification_answer_callback_handler(self, update: Update, context: Co
     )
     await self._update_record(update.effective_chat.id, state, answer)
 UsersAdapterClass.notification_answer_callback_handler = notification_answer_callback_handler
+    
+async def notification_set_state_callback_handler(self: UsersAdapterClass, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.callback_query.answer()
+    state_idx = update.callback_query.data.removeprefix(Notifications.CALLBACK_SET_STATE_PREFIX)
+    state, answer = Notifications.get_button_answer_by_state(state_idx)
+    await context.bot.send_message(
+        update.effective_chat.id,
+        answer,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await self._update_record(update.effective_chat.id, 'state', state)
+UsersAdapterClass.notification_set_state_callback_handler = notification_set_state_callback_handler
     
 async def my_events_unregister_start_callback_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.callback_query.answer()
