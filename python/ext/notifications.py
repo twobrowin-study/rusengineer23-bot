@@ -27,7 +27,7 @@ NotificationsAdapterClass.get_inline_keyboard_by_state = get_inline_keyboard_by_
 def get_button_answer_by_state(self: NotificationsAdapterClass, state_index: str, answer_idx: int = None) -> tuple[str,str]|tuple[str,str,str]:
     key_index = int(state_index)
     row = self.as_df.loc[key_index]
-    if not answer_idx:
+    if answer_idx == None:
         return row.state, row.button_answer[0]
     return row.state, row.button_answer[answer_idx], row.button_text[answer_idx]
 NotificationsAdapterClass.get_button_answer_by_state = get_button_answer_by_state

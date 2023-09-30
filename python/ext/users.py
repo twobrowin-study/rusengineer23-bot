@@ -262,10 +262,10 @@ UsersAdapterClass.notification_answer_callback_handler = notification_answer_cal
 async def notification_set_state_callback_handler(self: UsersAdapterClass, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.callback_query.answer()
     state_idx = update.callback_query.data.removeprefix(Notifications.CALLBACK_SET_STATE_PREFIX)
-    state, answer = Notifications.get_button_answer_by_state(state_idx)
+    state, text = Notifications.get_button_answer_by_state(state_idx)
     await context.bot.send_message(
         update.effective_chat.id,
-        answer,
+        text,
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=ReplyKeyboardRemove()
     )
