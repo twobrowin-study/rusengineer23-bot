@@ -89,7 +89,7 @@ async def proceed_registration_handler(self: UsersAdapterClass, update: Update, 
         await update.message.reply_markdown(registration_complete, reply_markup=Keyboard.reply_keyboard)
         await self._batch_update_or_create_record(update.effective_chat.id, **{
             'accreditation_code': accreditation_code,
-            'is_accredited':      I18n.no
+            'accreditation_status':      I18n.qr_not_accredited
         })
     else:
         await update.message.reply_markdown(registration_next.question, reply_markup=registration_next.reply_keyboard)
@@ -158,15 +158,27 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
     if keyboard_row.function == Keyboard.QR_CODE_FUNCTION:
         user = self.get(update.message.chat_id)
         accreditation_code = user.accreditation_code
-        if user.is_accredited not in [I18n.qr_sent, I18n.yes]:
+        if user.accreditation_status == I18n.qr_not_accredited:
             await update.message.reply_markdown(
-                Settings.qr_accreditation_failure.format(accredetation_code=accreditation_code)
+                Settings.qr_accreditation_not_yet.format(accreditation_code=accreditation_code)
             )
             return
         
-        qr = Qr.get(accreditation_code)
-        qr_photo = base64.standard_b64decode(qr.base64)
-        await update.message.reply_photo(qr_photo, caption=Settings.qr_code_caption, parse_mode=ParseMode.MARKDOWN)
+        if user.accreditation_status in [I18n.qr_is_accredited_sent, I18n.qr_is_accredited_not_sent]:
+            qr = Qr.get(accreditation_code)
+            qr_photo = base64.standard_b64decode(qr.base64)
+            await update.message.reply_photo(qr_photo, caption=Settings.qr_code_caption, parse_mode=ParseMode.MARKDOWN)
+            return
+
+        if user.accreditation_status == I18n.qr_not_needed:
+            await update.message.reply_markdown(
+                Settings.qr_accreditation_no_need.format(accreditation_code=accreditation_code)
+            )
+            return
+
+        await update.message.reply_markdown(
+            Settings.qr_accreditation_error.format(accreditation_code=accreditation_code)
+        )
         return
 
     if keyboard_row.function == Keyboard.BACK_FUNCTION:

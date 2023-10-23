@@ -35,7 +35,7 @@ async def _perform_accredidation(app: Application) -> None:
     to_accreditate_codes = [
         Settings.accreditation_code_template.format(accreditiation_num=num)
         for num, state in enumerate(accredidation_values[1:])
-        if state == I18n.yes
+        if state == I18n.qr_is_accredited_not_sent
     ]
 
     for accreditation_code in to_accreditate_codes:
@@ -46,7 +46,7 @@ async def _perform_accredidation(app: Application) -> None:
         qr_photo = base64.standard_b64decode(qr.base64)
 
         await bot.send_photo(chat_id, qr_photo, caption=Settings.qr_code_caption, parse_mode=ParseMode.MARKDOWN)
-        await Users._update_record(chat_id, 'is_accredited', I18n.qr_sent)
+        await Users._update_record(chat_id, 'accreditation_status', I18n.qr_is_accredited_sent)
 
         Log.info(f"Sent accredidation message to user {chat_id}")
 
