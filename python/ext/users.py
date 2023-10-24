@@ -207,10 +207,27 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
             await update.message.reply_markdown(Settings.all_my_events_list_empty_text)
             return
 
-        await update.message.reply_markdown(
-            keyboard_row.text_markdown.format(template="\n\n".join(my_events)),
-            reply_markup=Keyboard.get_event_unregister_inline_button()
-        )
+        my_events_message = keyboard_row.text_markdown.format(template="\n\n".join(my_events))
+        my_events_messages = [
+            my_events_message[idx:idx+4096]
+            for idx in range(0, len(my_events_message), 4096)
+        ]
+
+        if len(my_events_messages) > 1:
+            for idx in range(1,len(my_events_messages)):
+                newline_last_index = my_events_messages[idx-1].rfind("\n\n")
+                postfix_of_last_index = my_events_messages[idx-1][newline_last_index:]
+                my_events_messages[idx-1] = my_events_messages[idx-1].removesuffix(postfix_of_last_index)
+                my_events_messages[idx]   = f"{postfix_of_last_index}{my_events_messages[idx]}"
+        
+        for idx in range(len(my_events_messages)):
+            reply_markup=None
+            if idx == len(my_events_messages)-1:
+                reply_markup=Keyboard.get_event_unregister_inline_button()
+            await update.message.reply_markdown(
+                my_events_messages[idx],
+                reply_markup=reply_markup
+            )
         return
     
     if keyboard_row.key.endswith(Keyboard.PROGRAM_DOWNLOAD_KEY):
