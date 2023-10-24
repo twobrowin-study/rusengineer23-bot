@@ -230,7 +230,7 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
             )
         return
     
-    if keyboard_row.key.endswith(Keyboard.PROGRAM_DOWNLOAD_KEY):
+    if keyboard_row.key.endswith(Keyboard.PROGRAM_DOWNLOAD_KEY) or keyboard_row.function == Keyboard.PROGRAM_DOWNLOAD_KEY:
         if keyboard_row.send_document not in [None, '']:
             await update.message.reply_document(
                 keyboard_row.send_document,
