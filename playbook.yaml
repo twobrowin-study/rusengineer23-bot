@@ -1,6 +1,14 @@
+---
+- name: Get secrets from vault
+  hosts: all
+  gather_facts: false
+  roles:
+    - role: bmstu.vats.init
+      vault_path_inventory: bots/data/deploy,inventory-secrets.yaml
+      vault_path_secrets:   bots/data/rusengineer23,secrets.yaml
+      validate_certs: false
+
 - hosts: all
-  vars_files:
-    - secrets.yaml
   tasks:
     - name: Init a new swarm with default parameters
       community.docker.docker_swarm:
@@ -14,8 +22,8 @@
 
     - name: Run bot docker service
       docker_swarm_service:
-        name: createch-bot
-        image: twobrowin/createch-bot:1.3.6
+        name: rusengineer23-bot
+        image: twobrowin/rusengineer23-bot:1.0.0
         mounts:
           - source: /home/user/hashdb.sqlite
             target: /hashdb.sqlite
@@ -23,9 +31,9 @@
         env:
           TZ: "Europe/Moscow"
           
-          BOT_TOKEN:       "{{ bot_token }}"
-          SHEETS_ACC_JSON: "{{ sheet_acc_json | string }}"
-          SHEETS_LINK:     "{{ sheets_link }}"
+          BOT_TOKEN:       "{{ secrets.bot_token }}"
+          SHEETS_ACC_JSON: "{{ secrets.sheet_acc_json | string }}"
+          SHEETS_LINK:     "{{ secrets.sheets_link }}"
 
           SWITCH_UPDATE_TIME:   '15'
           SETTINGS_UPDATE_TIME: '35'
