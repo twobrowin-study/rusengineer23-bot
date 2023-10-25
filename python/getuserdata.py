@@ -1,8 +1,7 @@
 import os, json, dotenv, gspread
-
 import pandas as pd
-
 from ext.database import HashDb
+from datetime import datetime
 
 dotenv.load_dotenv()
 
@@ -10,14 +9,13 @@ SHEETS_ACC_JSON = json.loads(os.environ.get('SHEETS_ACC_JSON'))
 SHEETS_LINK     = os.environ.get('SHEETS_LINK')
 HASH_DB         = os.environ.get('HASH_DB')
 
-USERS      = os.environ.get('USERS')
-FROM_FIELD = os.environ.get('FROM_FIELD')
-YES        = os.environ.get('YES')
+USERS  = os.environ.get('USERS')
+OUTPUT = os.environ.get('OUTPUT')
 
 NAME  = os.environ.get('NAME')
 PHONE = os.environ.get('PHONE')
 
-print(f"Loading user data by field ${FROM_FIELD}")
+print(f"Loading user data")
 
 db = HashDb(HASH_DB)
 
@@ -34,15 +32,10 @@ df = df.drop(0, axis='index')
 
 print('Loaded dataframe')
 
-df_by_field: pd.DataFrame = df.loc[df[FROM_FIELD] == YES][[NAME, PHONE]]
+for _,row in df.iterrows():
+    row[NAME]  = db.get_val(row[NAME])
+    row[PHONE] = db.get_val(row[PHONE])
 
-print("Printing report now...\n")
+print('Saving output file to xlsx')
 
-print(f"{FROM_FIELD}:")
-
-for _,row in df_by_field.iterrows():
-    name  = db.get_val(row[NAME])
-    phone = db.get_val(row[PHONE])
-    print(f"  {name}: {phone}")
-
-print()
+df.to_excel(OUTPUT.format(datetime=datetime.now().strftime('%Y_%m_%d_%H_%M')),sheet_name=USERS)
