@@ -9,7 +9,7 @@ SHEETS_ACC_JSON = json.loads(os.environ.get('SHEETS_ACC_JSON'))
 SHEETS_LINK     = os.environ.get('SHEETS_LINK')
 HASH_DB         = os.environ.get('HASH_DB')
 
-USERS  = os.environ.get('USERS')
+SHEET  = os.environ.get('SHEET')
 OUTPUT = os.environ.get('OUTPUT')
 
 NAME  = os.environ.get('NAME')
@@ -23,12 +23,11 @@ print("Connected to database")
 
 gc = gspread.service_account_from_dict(SHEETS_ACC_JSON)
 sh = gc.open_by_url(SHEETS_LINK)
-ws = sh.worksheet(USERS)
+ws = sh.worksheet(SHEET)
 
 print('Connected to spreadsheet')
 
 df = pd.DataFrame(ws.get_all_records())
-df = df.drop(0, axis='index')
 
 print('Loaded dataframe')
 
@@ -38,4 +37,9 @@ for _,row in df.iterrows():
 
 print('Saving output file to xlsx')
 
-df.to_excel(OUTPUT.format(datetime=datetime.now().strftime('%Y_%m_%d_%H_%M')),sheet_name=USERS)
+df.to_excel(
+    OUTPUT.format(
+        datetime=datetime.now().strftime('%Y_%m_%d_%H_%M'),
+        sheet=SHEET.lower().replace(' ', '_')),
+    sheet_name=SHEET
+)
