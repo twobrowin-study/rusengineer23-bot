@@ -7,8 +7,6 @@
       vault_path_inventory: bots/data/deploy,inventory-secrets.yaml
       vault_path_secrets:   bots/data/rusengineer23,secrets.yaml
       validate_certs: false
-
-- hosts: all
   tasks:
     - name: Init a new swarm with default parameters
       community.docker.docker_swarm:
@@ -23,7 +21,7 @@
     - name: Run bot docker service
       docker_swarm_service:
         name: rusengineer23-bot
-        image: twobrowin/rusengineer23-bot:1.0.1
+        image: twobrowin/rusengineer23-bot:1.0.2
         mounts:
           - source: /home/user/hashdb.sqlite
             target: /hashdb.sqlite

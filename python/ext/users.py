@@ -230,28 +230,27 @@ async def keyboard_key_handler(self: UsersAdapterClass, update: Update, context:
             )
         return
     
+    user = self.get(update.effective_chat.id)
+    is_registered = False
+    reply_markup  = None
+    if keyboard_row.state not in [None, '']:
+        is_registered = (user[keyboard_row.state] == I18n.yes)
+        reply_markup = Keyboard.get_inline_keyboard_by_state(keyboard_row.state)
+        if is_registered:
+            reply_markup = Keyboard.get_unregister_inline_keyboard_by_state(keyboard_row.state)
+    
     if keyboard_row.key.endswith(Keyboard.PROGRAM_DOWNLOAD_KEY) or keyboard_row.function == Keyboard.PROGRAM_DOWNLOAD_KEY:
         if keyboard_row.send_document not in [None, '']:
             await update.message.reply_document(
                 keyboard_row.send_document,
                 caption=keyboard_row.text_markdown,
-                parse_mode=ParseMode.MARKDOWN
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=reply_markup
             )
             return
-        await update.message.reply_markdown(keyboard_row.text_markdown)
+        await update.message.reply_markdown(keyboard_row.text_markdown, reply_markup=reply_markup)
         return
-
-    user = self.get(update.effective_chat.id)
-    is_registered = (user[keyboard_row.state] == I18n.yes)
-    if is_registered:
-        reply_markup = Keyboard.get_unregister_inline_keyboard_by_state(keyboard_row.state)
-        await update.message.reply_markdown(
-            keyboard_row.text_markdown,
-            reply_markup=reply_markup
-        )
-        return
-
-    reply_markup = Keyboard.get_inline_keyboard_by_state(keyboard_row.state)
+    
     await update.message.reply_markdown(
         keyboard_row.text_markdown,
         reply_markup=reply_markup
