@@ -87,9 +87,13 @@ async def proceed_registration_handler(self: UsersAdapterClass, update: Update, 
         accreditation_code = Settings.accreditation_code_template.format(accreditiation_num=user.name)
         registration_complete = Settings.registration_complete.format(accreditation_code=accreditation_code)
         await update.message.reply_markdown(registration_complete, reply_markup=Keyboard.reply_keyboard)
+        await update.message.reply_markdown(
+            Settings.first_event_text_markdown,
+            reply_markup=Keyboard.get_inline_keyboard_by_state(Settings.first_event_state)
+        )
         await self._batch_update_or_create_record(update.effective_chat.id, **{
-            'accreditation_code': accreditation_code,
-            'accreditation_status':      I18n.qr_not_accredited
+            'accreditation_code':   accreditation_code,
+            'accreditation_status': I18n.qr_not_accredited
         })
     else:
         await update.message.reply_markdown(registration_next.question, reply_markup=registration_next.reply_keyboard)

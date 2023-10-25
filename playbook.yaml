@@ -21,7 +21,7 @@
     - name: Run bot docker service
       docker_swarm_service:
         name: rusengineer23-bot
-        image: twobrowin/rusengineer23-bot:1.0.2
+        image: twobrowin/rusengineer23-bot:1.0.4
         mounts:
           - source: /home/user/hashdb.sqlite
             target: /hashdb.sqlite
