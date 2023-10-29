@@ -5,6 +5,8 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from spreadsheetbot.sheets.keyboard import Keyboard
 
 def get_inline_keyboard_by_state(self: NotificationsAdapterClass, state: str) -> InlineKeyboardMarkup|None:
+    if state in [None, '']:
+        return Keyboard.reply_keyboard
     key = self.get_by_state(state)
     button_text = key.button_text
     key_index = key.name

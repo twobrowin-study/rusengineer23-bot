@@ -75,6 +75,8 @@ def reply_buttons_split(self: KeyboardAdapterClass, df) -> pd.DataFrame:
 KeyboardAdapterClass.reply_buttons_split = reply_buttons_split
 
 def get_inline_keyboard_by_state(self: KeyboardAdapterClass, state: str) -> InlineKeyboardMarkup|None:
+    if state in [None, '']:
+        return None
     key = self.get_by_state(state)
     button_text = key.button_text
     key_index = key.name
