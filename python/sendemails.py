@@ -58,6 +58,7 @@ df = pd.DataFrame(users_ws.get_all_records())
 df = df.drop(0, axis='index')
 
 df = df.loc[~df[EMAIL].isin(['', None])]
+df = df.loc[1461:1463]
 
 print('Loaded users dataframe')
 

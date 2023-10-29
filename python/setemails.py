@@ -44,6 +44,8 @@ print('Loaded email file dataframe')
 
 avaliable_users = users_df.loc[users_df.accreditation_status == MAIL_ACCREDITATION_STATUS]
 
+avaliable_users = avaliable_users.loc[1461:1463]
+
 update_vals = []
 for idx,row in email_df.iterrows():
     user = avaliable_users.iloc[idx]
