@@ -13,6 +13,7 @@ SHEET = os.environ.get('SHEET')
 
 NAME     = os.environ.get('NAME')
 PHONE    = os.environ.get('PHONE')
+EMAIL    = os.environ.get('EMAIL')
 CATEGORY = os.environ.get('CATEGORY')
 
 ACCREDITATION_CODE   = os.environ.get('ACCREDITATION_CODE')
@@ -48,6 +49,7 @@ print('Loaded dataframe')
 for _,row in df.iterrows():
     row[NAME]  = db.get_val(row[NAME])
     row[PHONE] = db.get_val(row[PHONE])
+    row[EMAIL] = db.get_val(row[EMAIL]) if row[EMAIL] not in ['', None] else ''
 
 print('Replaced name and phone number')
 
@@ -61,6 +63,7 @@ for _,row in df.iterrows():
     output_data += [{
         NAME:     row[NAME],
         PHONE:    row[PHONE],
+        EMAIL:    row[EMAIL],
         CATEGORY: row[CATEGORY],
 
         ACCREDITATION_CODE:   row.accreditation_code,
@@ -73,6 +76,7 @@ for _,row in df.iterrows():
             output_data += [{
                 NAME:     row[NAME],
                 PHONE:    row[PHONE],
+                EMAIL:    row[EMAIL],
                 CATEGORY: row[CATEGORY],
 
                 ACCREDITATION_CODE:   row.accreditation_code,

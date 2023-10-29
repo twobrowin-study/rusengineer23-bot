@@ -84,7 +84,7 @@ async def proceed_registration_handler(self: UsersAdapterClass, update: Update, 
         return
 
     if last_state:
-        accreditation_code = Settings.accreditation_code_template.format(accreditiation_num=user.name)
+        accreditation_code = Settings.accreditation_code_template.format(accreditiation_num=user.name - Settings.accreditation_code_offset)
         registration_complete = Settings.registration_complete.format(accreditation_code=accreditation_code)
         await update.message.reply_markdown(registration_complete, reply_markup=Keyboard.reply_keyboard)
         await update.message.reply_markdown(
