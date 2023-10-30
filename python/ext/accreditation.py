@@ -32,11 +32,13 @@ async def _perform_accredidation(app: Application) -> None:
     accredidation_values = await Users.wks.col_values(Settings.accredidation_column_num)
     Log.info("Got whole accredidation column")
 
-    to_accreditate_codes = [
-        Settings.accreditation_code_template.format(accreditiation_num=num)
-        for num, state in enumerate(accredidation_values[1:])
-        if state == I18n.qr_is_accredited_not_sent
-    ]
+    to_accreditate_codes = []
+    for num, state in enumerate(accredidation_values[1:]):
+        if state == I18n.qr_is_accredited_not_sent:
+            accreditation_number_offseted = num - Settings.accreditation_code_offset_one
+            if accreditation_number_offseted > Settings.accreditation_code_offset_one_max:
+                accreditation_number_offseted = num + Settings.accreditation_code_offset_two
+            to_accreditate_codes += [Settings.accreditation_code_template.format(accreditiation_num=accreditation_number_offseted)]
 
     for accreditation_code in to_accreditate_codes:
         user = Users.get_by_accreditation_code(accreditation_code)
