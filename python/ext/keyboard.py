@@ -30,8 +30,7 @@ async def _get_df(self) -> pd.DataFrame:
     df = df.drop(index = 0, axis = 0)
     df = self.reply_buttons_split(df)
     df = df.loc[
-        (df.key != "") &
-        (df.is_active == I18n.yes)
+        (df.key != "")
     ]
     return df
 KeyboardAdapterClass._get_df = _get_df
@@ -57,7 +56,8 @@ async def _process_df_update(self: KeyboardAdapterClass):
             self.EVENT_LIST_FUNCTION,
             self.ALL_MY_EVENTS_FUNCTION,
             self.PROGRAM_DOWNLOAD_FUNCTION
-        ])
+        ]) &
+        (self.as_df.is_active == I18n.yes)
     ].key.values.tolist()
     self.reply_keyboard = self._create_keyboard_markup_from_keys(base_keys)
     
@@ -66,7 +66,10 @@ async def _process_df_update(self: KeyboardAdapterClass):
 KeyboardAdapterClass._process_df_update = _process_df_update
 
 def get_reply_keyboard_by_function(self: KeyboardAdapterClass, function: str) -> list[str]:
-    keys = self.as_df.loc[self.as_df.function == function].key.values.tolist()
+    keys = self.as_df.loc[
+        (self.as_df.function == function)&
+        (self.as_df.is_active == I18n.yes)
+    ].key.values.tolist()
     return self._create_keyboard_markup_from_keys(keys, append_back_key = True)
 KeyboardAdapterClass.get_reply_keyboard_by_function = get_reply_keyboard_by_function
 
